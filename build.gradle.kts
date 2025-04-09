@@ -1,3 +1,5 @@
+import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
+
 //参考: https://juejin.cn/post/7162815124539965453
 //https://zhuanlan.zhihu.com/p/57541660
 plugins {
@@ -5,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version "1.8.20"
     id("org.jetbrains.intellij") version "1.13.3"//要为 IDEA 插件开发流程提供各方面的支持，例如运行、测试、部署等
     id("org.jetbrains.compose") version "1.4.1"
+    id("com.strumenta.antlr-kotlin") version "1.0.2"
 }
 
 group = "com.lt"
@@ -27,7 +30,7 @@ intellij {
 
 sourceSets {
     main {
-        java.srcDirs("src/main/kotlin")
+        java.srcDirs("src/main/kotlin",layout.buildDirectory.dir("generatedAntlr"))
     }
     test {
         java.srcDirs("src/test/kotlin")
@@ -61,7 +64,24 @@ tasks {
     }
 }
 
+tasks.register<AntlrKotlinTask>("generateKotlinGrammarSource") {
+    dependsOn("cleanGenerateKotlinGrammarSource")
+
+    source = fileTree(layout.projectDirectory.dir("antlr")) {
+        include("**/*.g4")
+    }
+
+    val pkgName = "com.strumenta.antlrkotlin.parsers.generated"
+    packageName = pkgName
+
+    arguments = listOf("-visitor")
+
+    val outDir = "generatedAntlr/${pkgName.replace(".", "/")}"
+    outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
+}
+
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("com.google.code.gson:gson:2.8.7")
+    implementation("com.strumenta:antlr-kotlin-runtime:1.0.2")
 }

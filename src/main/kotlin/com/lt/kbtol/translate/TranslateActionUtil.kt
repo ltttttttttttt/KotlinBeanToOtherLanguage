@@ -17,10 +17,12 @@ object TranslateActionUtil {
         val model = editor.selectionModel
         var selectStart = model.selectionStart
 
+        val output = languageEnum.translate.action(e, languageEnum, input)
+
         //只允许异步修改文件
         WriteCommandAction.runWriteCommandAction(e.project) {
             //在光标位置插入结果
-            editor.document.replaceString(selectStart, selectStart, "")// TODO by lt test
+            editor.document.replaceString(selectStart, selectStart, output)
         }
     }
 }
