@@ -14,4 +14,6 @@ class KBClass(
     val primaryConstructorParameters: List<KBParameter>,
     //所有属性
     val parameters: List<KBParameter>,
+    //内部类(不一定是inner)
+    val innerClass: List<KBClass>,
 )

@@ -16,12 +16,20 @@ object TSTranslate : ITranslate() {
         input: String,
         classList: List<KBClass>,
     ): String {
-        return classList.joinToString("\n\n") { kbClass ->
-            val classDoc = if (kbClass.doc.isEmpty()) "" else "/*${kbClass.doc}/*\n"
-            """${classDoc}export class ${kbClass.name} {
+        return classList.joinToString("\n\n", transform = ::createClass)
+    }
+
+    private fun createClass(kbClass: KBClass): String {
+        val classDoc = if (kbClass.doc.isEmpty()) "" else "/*${kbClass.doc}/*\n"
+        val innerClass = if (kbClass.innerClass.isEmpty()) "" else "\n\n${
+            kbClass.innerClass.joinToString(
+                "\n\n",
+                transform = ::createClass
+            )
+        }"
+        return """${classDoc}export class ${kbClass.name} {
 ${createParameter(kbClass)}
-}"""
-        }
+}$innerClass"""
     }
 
     private fun createParameter(kbClass: KBClass): String {
@@ -37,10 +45,16 @@ ${createParameter(kbClass)}
             "String", "Char" -> "string"
             "Long", "Int", "Double", "Float", "Byte", "Short" -> "number"
             "Boolean" -> "boolean"
-            "List", "ArrayList", "MutableList" -> "[]"
-            else -> "object"
+            "List", "ArrayList", "MutableList" -> {
+                val first = type.arguments.firstOrNull()
+                val listType = if (first != null) createType(first) else ""
+                "$listType[]"
+            }
+
+            "Map", "MutableMap", "HashMap" -> "object"
+            else -> type.name
         }
-        val typeString = if (type.nullable) "| null " else ""
-        return "$typeName $typeString"
+        val typeString = if (type.nullable) " | null " else ""
+        return "$typeName$typeString"
     }
 }

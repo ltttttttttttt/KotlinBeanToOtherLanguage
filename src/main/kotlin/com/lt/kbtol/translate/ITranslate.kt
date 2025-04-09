@@ -41,12 +41,17 @@ abstract class ITranslate {
     //创建类
     private fun createClass(topLevel: TopLevelObject): KBClass? {
         val classDeclaration = topLevel.declaration.classDeclaration ?: return null
+        return createClass(classDeclaration)
+    }
+
+    private fun createClass(classDeclaration: ClassDeclaration): KBClass? {
         if (classDeclaration.`class` != true) return null
         classDeclaration.simpleIdentifier.value
         val name = classDeclaration.simpleIdentifier.value
         val doc = ""
         val primaryConstructorParameters = mutableListOf<KBParameter>()
         val parameters = mutableListOf<KBParameter>()
+        val innerClassList = mutableListOf<KBClass>()
         classDeclaration.primaryConstructor?.classParameters?.classParameter?.forEach {
             val constructorParameter = createPrimaryConstructorParameters(it)
             if (constructorParameter != null) {
@@ -58,12 +63,18 @@ abstract class ITranslate {
             val parameter = createParameter(it)
             if (parameter != null)
                 parameters.add(parameter)
+            it.declaration?.classDeclaration?.let {
+                val innerClass = createClass(it)
+                if (innerClass != null)
+                    innerClassList.add(innerClass)
+            }
         }
         return KBClass(
             name = name,
             doc = doc,
             primaryConstructorParameters = primaryConstructorParameters,
             parameters = parameters,
+            innerClass = innerClassList,
         )
     }
 
