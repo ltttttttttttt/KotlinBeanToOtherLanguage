@@ -85,8 +85,40 @@ abstract class ITranslate {
             mutable = classParameter.mutable,
             doc = "",
             type = createType(classParameter.type),
-            defaultValue = "",
+            defaultValue = getDefaultValue(classParameter.expression),
         )
+    }
+
+    //获取参数默认值
+    private fun getDefaultValue(expression: Expression?): String {
+        val primaryExpression = expression?.disjunction?.conjunction?.firstOrNull()
+            ?.equality?.firstOrNull()
+            ?.comparison?.firstOrNull()
+            ?.genericCallLikeComparison?.firstOrNull()
+            ?.infixOperation?.elvisExpression?.infixFunctionCall?.firstOrNull()
+            ?.rangeExpression?.firstOrNull()
+            ?.additiveExpression?.firstOrNull()
+            ?.multiplicativeExpression?.firstOrNull()
+            ?.asExpression?.firstOrNull()
+            ?.prefixUnaryExpression?.postfixUnaryExpression?.primaryExpression
+        //字面量
+        primaryExpression?.literalConstant
+            ?.let {
+                it.booleanLiteral?.value?.let { return it.toString() }
+                it.integerLiteral?.value?.let { return it }
+                it.hexLiteral?.value?.let { return it.replace("0x", "").toInt(16).toString() }
+                it.binLiteral?.value?.let { return it.replace("0b", "").toInt(2).toString() }
+                it.characterLiteral?.value?.let { return "'$it'" }
+                it.realLiteral?.value?.let { return it }
+                it.nullLiteral?.let { return "null" }
+                it.longLiteral?.value?.let { return it }
+                it.unsignedLiteral?.value?.let { return it }
+            }
+        //字符串
+        primaryExpression?.stringLiteral?.lineStringLiteral?.sub?.firstOrNull()
+            ?.lineStringContent?.lineStrText?.value
+            ?.let { return "\"$it\"" }
+        return ""
     }
 
     //创建类普通参数
@@ -97,7 +129,7 @@ abstract class ITranslate {
             mutable = propertyDeclaration.mutable,
             doc = "",
             type = createType(propertyDeclaration.variableDeclaration?.type),
-            defaultValue = "",
+            defaultValue = getDefaultValue(propertyDeclaration.expression),
         )
     }
 
