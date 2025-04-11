@@ -92,11 +92,13 @@ class TranslateAction : DumbAwareAction() {
                 FlowRow(verticalAlignment = Alignment.CenterVertically) {
                     Text("To language: ")
                     LanguageEnum.values().forEach {
-                        RadioButton(language == it, {
-                            language = it
-                        })
-                        Text(it.language)
-                        Spacer(Modifier.width(12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { language = it }) {
+                            RadioButton(language == it, {
+                                language = it
+                            })
+                            Text(it.language)
+                            Spacer(Modifier.width(12.dp))
+                        }
                     }
                 }
                 Spacer(Modifier.height(15.dp))
