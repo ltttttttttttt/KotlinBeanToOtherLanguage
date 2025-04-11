@@ -6,10 +6,10 @@ import com.lt.kbtol.structure.*
 
 /**
  * creator: lt  2025/4/8  lt.dygzs@qq.com
- * effect : TypeScript
+ * effect : JavaScript
  * warning:
  */
-object TSTranslate : ITranslate() {
+object JSTranslate : ITranslate() {
     override fun doAction(
         e: AnActionEvent,
         languageEnum: LanguageEnum,
@@ -36,25 +36,7 @@ ${createParameter(kbClass)}
         return kbClass.parameters.joinToString("\n") { kbParameter ->
             val doc = if (kbParameter.doc.isEmpty()) "" else "/*${kbParameter.doc}*/\n    "
             val defaultValue = if (kbParameter.defaultValue.isNullOrEmpty()) "" else " = ${kbParameter.defaultValue}"
-            """    ${doc}${kbParameter.name}: ${createType(kbParameter.type)}${defaultValue}"""
+            """    ${doc}${kbParameter.name}${defaultValue}"""
         }
-    }
-
-    private fun createType(type: KBType): String {
-        val typeName = when (type.name) {
-            "String", "Char" -> "string"
-            "Long", "Int", "Double", "Float", "Byte", "Short" -> "number"
-            "Boolean" -> "boolean"
-            "List", "ArrayList", "MutableList" -> {
-                val first = type.arguments.firstOrNull()
-                val listType = if (first != null) createType(first) else ""
-                "$listType[]"
-            }
-
-            "Map", "MutableMap", "HashMap" -> "object"
-            else -> type.name
-        }
-        val typeString = if (type.nullable) " | null" else ""
-        return "$typeName$typeString"
     }
 }

@@ -12,5 +12,5 @@ enum class LanguageEnum(
     val translate: ITranslate,
 ) {
     TS("TypeScript", TSTranslate),
-    JS("Javascript", TSTranslate),
+    JS("Javascript", JSTranslate),
 }
