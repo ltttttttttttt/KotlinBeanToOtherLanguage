@@ -16,8 +16,8 @@ import tree.grammar.*
 abstract class ITranslate {
 
 
-    private val classDoc = mutableListOf<KBDoc>()//类的所有注释
-    private val parameterDoc = mutableListOf<KBDoc>()//属性的所有注释
+    private val classDoc = HashMap<String/*name*/, String/*doc*/>()//类的所有注释
+    private val parameterDoc = HashMap<String/*name*/, String/*doc*/>()//属性的所有注释
     private var input = ""
 
     /**
@@ -201,10 +201,9 @@ abstract class ITranslate {
                 else -> return@forEach
             }
 
-            val doc = KBDoc(elementName, comment)
             when (matchResult.groupValues[4]) {
-                "class", "interface", "object" -> classDoc.add(doc)
-                "val", "var" -> parameterDoc.add(doc)
+                "class", "interface", "object" -> classDoc[elementName] = comment
+                "val", "var" -> parameterDoc[elementName] = comment
             }
         }
     }
@@ -212,13 +211,9 @@ abstract class ITranslate {
     //获取注释
     private fun getDoc(name: String, isClass: Boolean, isParameter: Boolean): String {
         return if (isClass) {
-            classDoc.find {
-                it.name == name
-            }?.doc ?: ""
+            classDoc[name] ?: ""
         } else if (isParameter) {
-            parameterDoc.find {
-                it.name == name
-            }?.doc ?: ""
+            parameterDoc[name] ?: ""
         } else {
             ""
         }
