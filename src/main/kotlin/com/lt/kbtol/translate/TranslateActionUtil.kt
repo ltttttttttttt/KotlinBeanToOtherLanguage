@@ -3,6 +3,7 @@ package com.lt.kbtol.translate
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.command.*
 import com.lt.kbtol.config.*
+import com.lt.kbtol.util.*
 
 /**
  * creator: lt  2023/7/4  lt.dygzs@qq.com
@@ -10,9 +11,10 @@ import com.lt.kbtol.config.*
  * warning:
  */
 object TranslateActionUtil {
-    fun doAction(e: AnActionEvent, languageEnum: LanguageEnum, input: String) {
-        //入口
-
+    /**
+     * 插入到用户当前光标
+     */
+    fun doInsertAction(e: AnActionEvent, languageEnum: LanguageEnum, input: String) {
         val editor = e.getData(CommonDataKeys.EDITOR) ?: return
         val model = editor.selectionModel
         var selectStart = model.selectionStart
@@ -24,5 +26,14 @@ object TranslateActionUtil {
             //在光标位置插入结果
             editor.document.replaceString(selectStart, selectStart, output)
         }
+    }
+
+    /**
+     * 将内容插入到剪切板
+     */
+    fun doClipBoardAction(e: AnActionEvent, languageEnum: LanguageEnum, input: String) {
+        val output = languageEnum.translate.action(e, languageEnum, input)
+        ClipboardUtil.setClipboardText(output)
+        NotificationUtil.showNotification("Copy to clipboard")
     }
 }

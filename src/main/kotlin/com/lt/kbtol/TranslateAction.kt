@@ -20,11 +20,28 @@ import javax.swing.*
 class TranslateAction : DumbAwareAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
-        //入口3:配置翻译1和翻译2的行为(翻译api,根据翻译结果生成文本到指定的位置,kv的一些规则)
-        doAction(e)
+        //入口,判断用户是否选择了文本,如果选择了文本则直接处理并放入剪切板,否则使用ui
+        val selectedText = getSelectedText(e)
+        if (selectedText.isNullOrEmpty())
+            doUIAction(e)
+        else
+            doAction(e, selectedText)
     }
 
-    private fun doAction(e: AnActionEvent) {
+    //获取当前选中的文本
+    private fun getSelectedText(e: AnActionEvent): String? {
+        val editor = e.getData(CommonDataKeys.EDITOR) ?: return null
+        val model = editor.selectionModel
+        return model.selectedText
+    }
+
+    //直接处理入口
+    private fun doAction(e: AnActionEvent, selectedText: String) {
+        TranslateActionUtil.doClipBoardAction(e, ConfigUtil.getConfig(e).language, selectedText)
+    }
+
+    //ui入口
+    private fun doUIAction(e: AnActionEvent) {
         SampleDialog(e).show()
     }
 
@@ -92,7 +109,7 @@ class TranslateAction : DumbAwareAction() {
         override fun doOKAction() {
             super.doOKAction()
             //输出
-            TranslateActionUtil.doAction(e, language, kotlinCode)
+            TranslateActionUtil.doInsertAction(e, language, kotlinCode)
         }
     }
 }
