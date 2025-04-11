@@ -20,7 +20,7 @@ object TSTranslate : ITranslate() {
     }
 
     private fun createClass(kbClass: KBClass): String {
-        val classDoc = if (kbClass.doc.isEmpty()) "" else "/*${kbClass.doc}/*\n"
+        val classDoc = if (kbClass.doc.isEmpty()) "" else "/**${kbClass.doc}*/\n"
         val innerClass = if (kbClass.innerClass.isEmpty()) "" else "\n\n${
             kbClass.innerClass.joinToString(
                 "\n\n",
@@ -34,7 +34,7 @@ ${createParameter(kbClass)}
 
     private fun createParameter(kbClass: KBClass): String {
         return kbClass.parameters.joinToString("\n") { kbParameter ->
-            val doc = if (kbParameter.doc.isEmpty()) "" else "    //${kbClass.doc}\n"
+            val doc = if (kbParameter.doc.isEmpty()) "" else "/*${kbParameter.doc}*/\n    "
             val defaultValue = if (kbParameter.defaultValue.isNullOrEmpty()) "" else "= ${kbParameter.defaultValue}"
             """    ${doc}${kbParameter.name}: ${createType(kbParameter.type)}${defaultValue}"""
         }
